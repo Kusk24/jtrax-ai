@@ -1,0 +1,13 @@
+# Downloaded weights and data — ~400 MB, all re-fetchable by the scripts.
+maia2_models/
+maia2_data/
+
+# Exported models. results/baseline.json IS tracked: it is the number every
+# later run is compared against, so it must not drift silently.
+results/*.onnx
+results/*.pt
+
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/

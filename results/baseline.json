@@ -1,0 +1,7 @@
+{
+  "model": "maia2 pretrained (type=rapid)",
+  "dataset": "maia2 bundled example test set",
+  "accuracy": 0.5311,
+  "device": "mps",
+  "torch": "2.8.0"
+}
