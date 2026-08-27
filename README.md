@@ -1,77 +1,77 @@
 # jtrax-ai
 
-Fine-tuning a chess opponent for JTrax. The goal is an engine that **plays like a
-kid at the student's level**, instead of Stockfish turned down — which plays
-perfectly and then blunders at random, and reads as a computer to a child.
+Take a small, weak, public chess model and fine-tune it into a measurably
+better one. The point is the fine-tune itself — an improved model that is ours,
+rather than only ever calling someone else's.
 
-The model is **Maia-2** (CSSLab, University of Toronto). It is rating-conditioned:
-one model serves every student level, because you pass the Elo in at inference
-time rather than shipping one net per level.
+**Base model:** `lichess_6layers` from [adamkarvonen/chess_llms][hf] — 1.3M
+parameters, 6 layers, 128-dim embedding, character-level over PGN text.
 
-Background and the option comparison live in the vault:
-`jtrax-docs/research/fine-tuning-a-model-for-jtrax.md`.
+```
+model_args: {n_layer: 6, n_head: 8, n_embd: 128, block_size: 1023, vocab_size: 32}
+params: 1.3M · iter_num: 600,000 · best_val_loss: 0.3415
+```
+
+Chosen because it is genuinely weak (so there is room to improve), obscure
+(everyone else uses the 8- and 16-layer), reads chess as plain text (so data
+prep is a text file, not a tensor encoder), and is small enough to train on a
+MacBook.
+
+**Data:** ~10,000 Lichess games, one rating band, public — never students'
+games.
+
+**Metrics:** move-match accuracy and legal-move rate, before vs. after.
+
+[hf]: https://huggingface.co/adamkarvonen/chess_llms
+
+## The benchmark: Maia-2
+
+Maia-2 is **not** the model being trained. It is the reference number, measured
+once so results have a scale to sit on:
+
+| | move-match |
+|---|---|
+| Maia-2 (23.3M params, 338M games) | **0.5311** |
+| `lichess_6layers`, before fine-tune | not yet measured |
+| `lichess_6layers`, after fine-tune | — |
+
+"I got 0.41" means nothing alone. "0.28 → 0.41, where state of the art is
+0.531" is a result. `step1_baseline.py` and `step2_export_onnx.py` produced
+that reference and the ONNX serving proof; neither needs running again.
 
 ## Setup — run once
 
-Your system Python is 3.13; maia2 supports 3.10–3.12, so it needs its own env.
+System Python is 3.13; maia2 needs 3.10–3.12, so the env is required.
 
 ```bash
 cd ~/Desktop/JTrax/jtrax-ai
 conda create -n maia2 python=3.12 -y
 conda activate maia2
-pip install maia2 onnx onnxruntime
+pip install maia2 onnx onnxruntime huggingface_hub
 ```
 
-The `conda activate maia2` line is needed in **every new terminal window** before
-running anything here.
+`conda activate maia2` is needed in **every new terminal**.
 
-## The two steps that come before Kaggle
+## Steps
 
-Both run on this Mac (Apple Silicon, via MPS) and cost zero Kaggle GPU quota.
-They exist to answer the two questions that decide whether this project is worth
-starting at all.
+| Script | Status | What it does |
+|---|---|---|
+| `step1_baseline.py` | done — 0.5311 | Maia-2 reference number |
+| `step2_export_onnx.py` | done — 93.2 MB, 2.3e-05 drift | proves browser serving works |
+| `step3_probe.py` | not written | load the 1.3M model, measure how bad it is |
+| `step4_data.py` | not written | pull 10k games, one band, train/held-out split |
+| `step5_train.py` | not written | the fine-tune |
+| `step6_eval.py` | not written | same metrics, before vs after |
 
-### Step 1 — baseline
+Steps 1–2 are complete and should not need re-running; the downloads are
+cached.
 
-```bash
-python step1_baseline.py
-```
+## Rules that do not bend
 
-Downloads the pretrained Maia-2 and scores it on the bundled example set. Prints
-a move-match accuracy number and writes it to `results/baseline.json`.
-
-That number is the thing every later run gets compared to. Without it, "did the
-fine-tune help?" has no answer.
-
-### Step 2 — the ONNX gate
-
-```bash
-python step2_export_onnx.py
-```
-
-The whole plan assumes a fine-tuned Maia-2 can be exported to ONNX and run in the
-browser next to the existing Stockfish WASM — free serving, no GPU server. But
-**maia2's docs never mention ONNX**, so this is unverified. This script tries the
-export and reports honestly whether it worked.
-
-- **Export succeeds** → the plan is real, move on to the eval set and Kaggle.
-- **Export fails** → stop and rethink serving before spending 30 GPU-hours. The
-  fallback is an inference endpoint on the Go backend, which costs the
-  free-tier-no-card rule.
-
-Better to learn this in an evening than after a month of training runs.
-
-## Only then: Kaggle
-
-Kaggle is Step 3 onward — data prep and the actual fine-tune. Notes when you get
-there:
-
-- **Private notebooks only.** Students are children; their linked Lichess games
-  never go in a public Kaggle notebook or dataset. Public Lichess dumps are fine.
-- Pick **2×T4** over the P100 — same 1 hour of quota per wall-clock hour, double
-  the compute.
-- Do **not** download a raw monthly Lichess dump (~30 GB compressed, ~300 GB
-  open). Stream-decompress and filter to the target rating band first, then save
-  the filtered result as a private Kaggle Dataset so sessions don't re-download.
-- Checkpoint every epoch to `/kaggle/working/`. Sessions die, and an
-  un-checkpointed 8-hour run is 8 hours of a 30-hour weekly quota gone.
+- **Public Lichess data only.** Students are children; their linked games never
+  enter this repo, a Kaggle notebook, or a public dataset.
+- **Freeze the held-out set before training.** Without it, "did it improve?"
+  has no answer.
+- Weights, checkpoints and `.onnx` files stay out of git — see `.gitignore`.
+  Everything there is re-downloadable in one line.
+- `results/baseline.json` **is** tracked. It must not drift silently.

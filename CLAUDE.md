@@ -1,36 +1,47 @@
 # jtrax-ai
 
-Fine-tuning **Maia-2** into a chess opponent that plays like a child at the
-student's level, to replace dialed-down Stockfish in the JTrax Play screen.
+Fine-tuning a small, weak, public chess model into a measurably better one.
+The deliverable is the improved model and the before/after numbers — not a
+feature shipped to students.
 
-House rules: `../CLAUDE.md`. Canonical background, the model comparison, and
-the verified ONNX gate results live in the vault:
-`jtrax-docs/research/fine-tuning-a-model-for-jtrax.md` — that note wins if this
-file disagrees with it.
+House rules: `../CLAUDE.md`. Background and the model comparison live in the
+vault: `jtrax-docs/research/fine-tuning-a-model-for-jtrax.md` — that note wins
+if this file disagrees with it.
 
-## Environment
+## What is being trained
 
-System Python is 3.13; maia2 supports 3.10–3.12, so the conda env is required.
+`lichess_6layers` from `adamkarvonen/chess_llms` — 1.3M params, 6 layers,
+n_embd 128, **character-level over PGN text** (vocab_size 32, block_size 1023).
+Needs nanoGPT's `GPT` class to load; the checkpoint is weights only.
 
-```bash
-conda activate maia2      # every new terminal
-```
+Not Maia. Maia-2 is the benchmark and is finished — see below.
 
-Not pnpm — this is the one JTrax repo that is Python, not JS.
+## What is already settled — do not redo
 
-## What is verified
+| Fact | Value |
+|---|---|
+| Maia-2 reference move-match | **0.5311** (`results/baseline.json`) |
+| Maia-2 → ONNX export | works, 93.2 MB fp32, drift 2.34e-05 |
+| maia2 `from_checkpoint` | **is a resume mechanism, not a fine-tune path** — the released `.pt` has no `training_metadata`, so it fails validation |
+| Maia-2 training scale | 337,855,102 games / 18.3B samples |
+| Env | conda `maia2`, py3.12 — system py3.13 is too new |
 
-`step1_baseline.py` → 0.5311 move-match on the bundled example set (MPS).
-`step2_export_onnx.py` → ONNX export matches PyTorch to 2.34e-05, 93.2 MB fp32.
-
-`results/baseline.json` is tracked on purpose. Every later run is compared
-against it, so it must never drift silently.
+`step1_baseline.py` and `step2_export_onnx.py` produced these. They do not need
+running again; downloads are cached.
 
 ## Constraints that do not bend
 
-- **Students are children.** Their linked Lichess games never go in a public
-  Kaggle notebook or dataset, and never into this repo. Public Lichess dumps
-  are fine.
-- **Build the eval set before training.** Without a frozen held-out set, "did
-  the fine-tune help?" has no answer.
-- Weights and `.onnx` files stay out of git — see `.gitignore`.
+- **Students are children.** Their linked Lichess games never enter this repo,
+  a Kaggle notebook, or any public dataset. Public Lichess dumps are fine.
+- **Freeze the held-out eval set before training.** Without it there is no
+  answer to "did the fine-tune help?"
+- Weights, checkpoints, `.onnx` stay out of git — all re-downloadable in one
+  line. `results/baseline.json` is tracked on purpose.
+- Python, not pnpm. The one JTrax repo that is not JS.
+
+## Kaggle, when it is needed
+
+Not needed yet — a 1.3M model trains on the M2. If it scales up: private
+notebooks only, 2×T4 costs the same quota as the P100 for double the compute,
+never download a raw monthly Lichess dump (~30 GB zst / ~300 GB open) —
+stream-filter first, and checkpoint every epoch to `/kaggle/working/`.
