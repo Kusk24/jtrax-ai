@@ -12,3 +12,8 @@ __pycache__/
 *.pyc
 .DS_Store
 .ipynb_checkpoints/
+
+# Training corpora — regenerate with step4_data.py
+data/
+hf_ckpts/
+runs/

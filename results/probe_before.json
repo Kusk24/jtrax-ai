@@ -1,0 +1,14 @@
+{
+  "model": "lichess_6layers (1.3M, pre-finetune)",
+  "games": 20,
+  "temperature": 0.5,
+  "legal_move_rate": 0.8483,
+  "legal_first_try_rate": 0.9195,
+  "avg_plies": 56.5,
+  "totals": {
+    "plies": 1130,
+    "proposed": 1332,
+    "legal": 1130,
+    "first_try_legal": 1039
+  }
+}

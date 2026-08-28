@@ -1,7 +1,7 @@
 """Step 1 — score the stock Maia-2 and record the number everything else is
 measured against. Runs on this Mac (MPS); costs no Kaggle GPU quota.
 
-Run:  conda activate maia2 && python step1_baseline.py
+Run:  conda activate jtrax-ai && python step1_baseline.py
 """
 
 import json
@@ -16,7 +16,7 @@ def main() -> int:
         from maia2 import dataset, inference, model
     except ImportError:
         print("maia2 not installed. Run:\n"
-              "  conda activate maia2 && pip install maia2 onnx onnxruntime")
+              "  conda activate jtrax-ai && pip install maia2 onnx onnxruntime")
         return 1
 
     import torch

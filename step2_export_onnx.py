@@ -17,7 +17,7 @@ Signature below is read from the installed package (maia2/main.py), not guessed:
 `elos_self` is what makes one model serve every student level: pass the pupil's
 band instead of shipping a separate net per level.
 
-Run:  conda activate maia2 && python step2_export_onnx.py
+Run:  conda activate jtrax-ai && python step2_export_onnx.py
 """
 
 import pathlib
@@ -35,7 +35,7 @@ def main() -> int:
         from maia2 import model
     except ImportError as exc:
         print(f"Missing dependency ({exc}). Run:\n"
-              "  conda activate maia2 && pip install maia2 onnx onnxruntime")
+              "  conda activate jtrax-ai && pip install maia2 onnx onnxruntime")
         return 1
 
     # Export traces on CPU regardless of where the model will eventually run.

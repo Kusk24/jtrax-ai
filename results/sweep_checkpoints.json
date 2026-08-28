@@ -1,0 +1,104 @@
+[
+  {
+    "checkpoint": "ckpt_iter_0.pt",
+    "params_m": 25.71,
+    "iter_num": 0,
+    "games": 8,
+    "temperature": 0.5,
+    "legal_move_rate": 0.0,
+    "legal_first_try_rate": 0.0,
+    "avg_plies": 0.0,
+    "totals": {
+      "plies": 0,
+      "proposed": 40,
+      "legal": 0,
+      "first_try_legal": 0
+    },
+    "sample_pgn": ";1."
+  },
+  {
+    "checkpoint": "ckpt_iter_20000.pt",
+    "params_m": 25.71,
+    "iter_num": 20000,
+    "games": 8,
+    "temperature": 0.5,
+    "legal_move_rate": 0.9402,
+    "legal_first_try_rate": 0.9657,
+    "avg_plies": 76.6,
+    "totals": {
+      "plies": 613,
+      "proposed": 652,
+      "legal": 613,
+      "first_try_legal": 592
+    },
+    "sample_pgn": ";1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O Be7 6.Re1 b5 7.Bb3 d6 8.c3 Bg4 9.h3 Bh5 10.d4 O-O 11.d5 Na5 12.Bc2 c6 13.Nbd2 h6 14.b4 cxd5 15.bxa5 dxe4 16.Nxe4 Nxe4 17.Rxe4 Bf6 18.Bxh6 gxh6 19.Qd2 Kh7 20.Rh4 Bg6 21.Rg4 Rg8 22.h4 Bxc2 23.Qxc2+ Kh8 24.Rxg8+ Kxg8 25.Rd1 Qc7 26.Qd3 Rd8 27.Ng5 Qe7 28.Qf5 Qf"
+  },
+  {
+    "checkpoint": "ckpt_iter_40000.pt",
+    "params_m": 25.71,
+    "iter_num": 40000,
+    "games": 8,
+    "temperature": 0.5,
+    "legal_move_rate": 0.9601,
+    "legal_first_try_rate": 0.9767,
+    "avg_plies": 75.2,
+    "totals": {
+      "plies": 602,
+      "proposed": 627,
+      "legal": 602,
+      "first_try_legal": 588
+    },
+    "sample_pgn": ";1.e4 c5 2.Nf3 e6 3.d4 cxd4 4.Nxd4 a6 5.Nc3 Qc7 6.Be2 Nf6 7.O-O Nc6 8.Be3 Bb4 9.Nxc6 Bxc3 10.Nd4 Bxd4 11.Qxd4 e5 12.Qb4 d6 13.Qb6 Qxb6 14.Bxb6 Bd7 15.Rfd1 Bc6 16.Ba5 b6 17.Bb4 h6 18.f3 Ke7 19.a4 Rhc8 20.Bxd6+ Ke6 21.Ba3 Nd7 22.b4 a5 23.b5 Bb7 24.Rd2 g5 25.Rad1 Rc3 26.Bb2 Rxc2 27.Rxc2 Rc8 28.Rxc8 Bxc"
+  },
+  {
+    "checkpoint": "ckpt_iter_60000.pt",
+    "params_m": 25.71,
+    "iter_num": 60000,
+    "games": 8,
+    "temperature": 0.5,
+    "legal_move_rate": 0.9589,
+    "legal_first_try_rate": 0.9804,
+    "avg_plies": 70.0,
+    "totals": {
+      "plies": 560,
+      "proposed": 584,
+      "legal": 560,
+      "first_try_legal": 549
+    },
+    "sample_pgn": ";1.e4 e5 2.Nf3 Nc6 3.Bb5 Nf6 4.O-O Nxe4 5.Re1 Nd6 6.Nxe5 Be7 7.Bf1 Nxe5 8.Rxe5 O-O 9.d4 Bf6 10.Bf4 Bxe5 11.dxe5 Ne8 12.Nc3 d6 13.Qd5 Be6 14.Qd3 h6 15.Re1 dxe5 16.Bxe5 Qxd3 17.Bxd3 Nd6 18.Bxd6 cxd6 19.Re3 Rac8 20.Rg3 Rfd8 21.f4 a6 22.Kf2 Kf8 23.f5 Bd7 24.Ke3 Bc6 25.f6 Rd7 26.Ne4 Re8 27.Kd4 Re5 28.c3 "
+  },
+  {
+    "checkpoint": "ckpt_iter_80000.pt",
+    "params_m": 25.71,
+    "iter_num": 80000,
+    "games": 8,
+    "temperature": 0.5,
+    "legal_move_rate": 0.9639,
+    "legal_first_try_rate": 0.9837,
+    "avg_plies": 76.8,
+    "totals": {
+      "plies": 614,
+      "proposed": 637,
+      "legal": 614,
+      "first_try_legal": 604
+    },
+    "sample_pgn": ";1.e4 c5 2.Nf3 e6 3.d4 cxd4 4.Nxd4 Nc6 5.Nc3 Qc7 6.Be2 a6 7.O-O Nf6 8.Nxc6 dxc6 9.f4 e5 10.Be3 Bd6 11.Qd3 exf4 12.Rxf4 Bxf4 13.Bxf4 Qa5 14.Rf1 Be6 15.Bd6 Qg5 16.Bf4 Qc5+ 17.Kh1 O-O 18.Bd6 Qg5 19.Bxf8 Rxf8 20.Qe3 Qxe3 21.Bxa6 Qd2 22.Be2 Qxc2 23.a3 Qxb2 24.Na4 Qxa3 25.Nc5 Qb4 26.Nxe6 fxe6 27.Bd3 Qd4 2"
+  },
+  {
+    "checkpoint": "ckpt_iter_100000.pt",
+    "params_m": 25.71,
+    "iter_num": 100000,
+    "games": 8,
+    "temperature": 0.5,
+    "legal_move_rate": 0.9621,
+    "legal_first_try_rate": 0.9892,
+    "avg_plies": 69.8,
+    "totals": {
+      "plies": 558,
+      "proposed": 580,
+      "legal": 558,
+      "first_try_legal": 552
+    },
+    "sample_pgn": ";1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Ba4 Nf6 5.O-O Be7 6.Re1 b5 7.Bb3 d6 8.c3 Na5 9.Bc2 c5 10.d4 exd4 11.cxd4 cxd4 12.Nxd4 Bd7 13.Nf5 O-O 14.Nxe7+ Qxe7 15.Nc3 Rfc8 16.Bf4 Be6 17.Bxd6 Qd7 18.Be5 Qxd1 19.Raxd1 Nd7 20.Bd6 Bg4 21.f3 Bh5 22.e5 Nc4 23.Be4 Ra7 24.Bd5 Nxb2 25.Rd2 Rac7 26.Bxc7 Rxc7 27.Rxb2 Rxc3 28."
+  }
+]

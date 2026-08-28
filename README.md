@@ -45,12 +45,12 @@ System Python is 3.13; maia2 needs 3.10–3.12, so the env is required.
 
 ```bash
 cd ~/Desktop/JTrax/jtrax-ai
-conda create -n maia2 python=3.12 -y
-conda activate maia2
+conda create -n jtrax-ai python=3.12 -y
+conda activate jtrax-ai
 pip install maia2 onnx onnxruntime huggingface_hub
 ```
 
-`conda activate maia2` is needed in **every new terminal**.
+`conda activate jtrax-ai` is needed in **every new terminal**.
 
 ## Steps
 
@@ -58,10 +58,26 @@ pip install maia2 onnx onnxruntime huggingface_hub
 |---|---|---|
 | `step1_baseline.py` | done — 0.5311 | Maia-2 reference number |
 | `step2_export_onnx.py` | done — 93.2 MB, 2.3e-05 drift | proves browser serving works |
-| `step3_probe.py` | not written | load the 1.3M model, measure how bad it is |
-| `step4_data.py` | not written | pull 10k games, one band, train/held-out split |
+| `step3_probe.py` | done — `lichess_6layers` 0.848 legal | play self-play games, measure legality |
+| `step3b_sweep.py` | written, not run | probe early training checkpoints to pick a worse base |
+| `step4_data.py` | not written | pull games at one rating band, train/held-out split |
 | `step5_train.py` | not written | the fine-tune |
-| `step6_eval.py` | not written | same metrics, before vs after |
+| `step6_eval.py` | not written | all three metrics, before vs after |
+
+## The three eval metrics
+
+A model can follow the rules and still play terribly, so one number is not
+enough. Measured before and after, on the same frozen set:
+
+| Metric | Question | Needs |
+|---|---|---|
+| **legal-move rate** | does it follow the rules? | self-play only |
+| **move-match accuracy** | does it play what a human at this level played? | held-out human games |
+| **average centipawn loss** | how good are the moves? | Stockfish (`brew install stockfish`) |
+
+ACPL is the standard chess measure of play quality: for each move, how much
+worse was it than the engine's best, in hundredths of a pawn. Lower is better —
+a strong club player is roughly 20–40, a beginner well over 100.
 
 Steps 1–2 are complete and should not need re-running; the downloads are
 cached.

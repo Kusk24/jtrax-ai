@@ -13,9 +13,10 @@ Two numbers come out, and both are the "before" side of the fine-tune:
 A model that scores well here has learned real structure. A model near zero has
 learned to imitate notation without tracking the position.
 
-Run:  conda activate maia2 && python step3_probe.py
+Run:  conda activate jtrax-ai && python step3_probe.py
 """
 
+import argparse
 import json
 import pathlib
 import pickle
@@ -37,10 +38,10 @@ MAX_RETRIES = 5  # resample an illegal move this many times before giving up
 TEMPERATURE = 0.5  # low: we want its best guess, not creative writing
 
 
-def load_model():
+def load_model(path=CKPT):
     from nanogpt_model import GPT, GPTConfig
 
-    ckpt = torch.load(CKPT, map_location="cpu", weights_only=False)
+    ckpt = torch.load(path, map_location="cpu", weights_only=False)
     model = GPT(GPTConfig(**ckpt["model_args"]))
 
     # nanoGPT checkpoints saved under torch.compile carry an "_orig_mod."
@@ -113,62 +114,71 @@ def play_game(model, stoi, itos):
     }
 
 
-def main() -> int:
-    if not CKPT.exists():
-        print(f"Checkpoint missing: {CKPT}\n"
-              "Fetch it with:\n"
-              "  python -c \"from huggingface_hub import hf_hub_download as d; "
-              "d('adamkarvonen/chess_llms',"
-              "'lichess_6layers_ckpt_no_optimizer.pt',local_dir='hf_models')\"")
-        return 1
-
+def probe(path, games, quiet=False):
+    """Play `games` self-play games with the checkpoint at `path`."""
     meta = pickle.loads(META.read_bytes())
     stoi, itos = meta["stoi"], meta["itos"]
 
-    model, ckpt = load_model()
+    model, ckpt = load_model(path)
     n = sum(p.numel() for p in model.parameters())
-    print(f"lichess_6layers · {n / 1e6:.2f}M params · "
-          f"trained to iter {ckpt['iter_num']:,}")
-    print(f"Playing {GAMES} games against itself, "
-          f"max {MAX_MOVES} plies, temperature {TEMPERATURE}\n")
 
     totals = {"plies": 0, "proposed": 0, "legal": 0, "first_try_legal": 0}
     longest = None
-    for g in range(GAMES):
+    for g in range(games):
         r = play_game(model, stoi, itos)
         for k in totals:
             totals[k] += r[k]
         if longest is None or r["plies"] > longest["plies"]:
             longest = r
-        print(f"  game {g + 1:2d}: {r['plies']:3d} plies · "
-              f"{r['legal']}/{r['proposed']} legal")
+        if not quiet:
+            print(f"  game {g + 1:2d}: {r['plies']:3d} plies · "
+                  f"{r['legal']}/{r['proposed']} legal")
 
-    legal_rate = totals["legal"] / max(totals["proposed"], 1)
-    first_rate = totals["first_try_legal"] / max(totals["plies"], 1)
-    avg_plies = totals["plies"] / GAMES
+    return {
+        "checkpoint": pathlib.Path(path).name,
+        "params_m": round(n / 1e6, 2),
+        "iter_num": ckpt.get("iter_num"),
+        "games": games,
+        "temperature": TEMPERATURE,
+        "legal_move_rate": round(totals["legal"] / max(totals["proposed"], 1), 4),
+        "legal_first_try_rate": round(
+            totals["first_try_legal"] / max(totals["plies"], 1), 4),
+        "avg_plies": round(totals["plies"] / games, 1),
+        "totals": totals,
+        "sample_pgn": longest["pgn"][:300],
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--ckpt", default=str(CKPT),
+                    help="path to a nanoGPT chess checkpoint")
+    ap.add_argument("--games", type=int, default=GAMES)
+    ap.add_argument("--out", default="probe_before.json",
+                    help="filename under results/")
+    args = ap.parse_args()
+
+    path = pathlib.Path(args.ckpt)
+    if not path.exists():
+        print(f"Checkpoint missing: {path}")
+        return 1
+
+    r = probe(path, args.games)
 
     print(f"\n{'=' * 54}")
-    print("  BEFORE fine-tuning")
+    print(f"  {r['checkpoint']}  ({r['params_m']}M params, "
+          f"iter {r['iter_num']:,})")
     print(f"{'=' * 54}")
-    print(f"  legal-move rate      {legal_rate:.3f}   "
-          f"({totals['legal']}/{totals['proposed']} proposals)")
-    print(f"  legal on first try   {first_rate:.3f}")
-    print(f"  average game length  {avg_plies:.1f} plies")
-    print(f"\n  longest game:\n  {longest['pgn'][:300]}")
+    print(f"  legal-move rate      {r['legal_move_rate']:.3f}   "
+          f"({r['totals']['legal']}/{r['totals']['proposed']} proposals)")
+    print(f"  legal on first try   {r['legal_first_try_rate']:.3f}")
+    print(f"  average game length  {r['avg_plies']} plies")
+    print(f"\n  longest game:\n  {r['sample_pgn']}")
 
     RESULTS.mkdir(exist_ok=True)
-    out = RESULTS / "probe_before.json"
-    out.write_text(json.dumps({
-        "model": "lichess_6layers (1.3M, pre-finetune)",
-        "games": GAMES,
-        "temperature": TEMPERATURE,
-        "legal_move_rate": round(legal_rate, 4),
-        "legal_first_try_rate": round(first_rate, 4),
-        "avg_plies": round(avg_plies, 1),
-        "totals": totals,
-    }, indent=2) + "\n")
+    out = RESULTS / args.out
+    out.write_text(json.dumps(r, indent=2) + "\n")
     print(f"\n  written to {out.relative_to(HERE)}")
-    print("\nThis is the floor. step5 trains, step6 re-runs this to compare.")
     return 0
 
 
