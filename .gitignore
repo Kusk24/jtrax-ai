@@ -17,3 +17,4 @@ __pycache__/
 data/
 hf_ckpts/
 runs/
+runs_maia/
