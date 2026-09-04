@@ -47,10 +47,13 @@ def pick_precision(device):
     """
     if device != "cuda":
         return torch.float32, False
-    if torch.cuda.is_bf16_supported():
-        return torch.bfloat16, False  # no scaler needed
+    # Ask the compute capability, NOT torch.cuda.is_bf16_supported(): that
+    # returns True on a T4 because it counts *emulated* bf16, which has no
+    # tensor-core path and ran ~9x slower than fp16 on Kaggle.
     major, _ = torch.cuda.get_device_capability()
-    if major >= 7:  # Turing (T4) and up handle fp16 well
+    if major >= 8:  # Ampere and newer: real bf16 tensor cores, no scaler needed
+        return torch.bfloat16, False
+    if major == 7:  # Turing (T4): fp16 is the fast path
         return torch.float16, True
     return torch.float32, False  # Pascal (P100): fp16 is not a win
 
