@@ -55,6 +55,26 @@ def pick_precision(device):
     return torch.float32, False  # Pascal (P100): fp16 is not a win
 
 
+def newest_checkpoint(directory):
+    """Highest-numbered ckpt_N.pt below a directory, or None.
+
+    Recursive, because Kaggle nests attached datasets a few levels under
+    /kaggle/input and the depth depends on how the dataset was created.
+    Names without a step number are skipped: ckpt_iter_0.pt is the random
+    starting point, and "resuming" from it silently restarts the run.
+    """
+    root = pathlib.Path(directory)
+    if not root.exists():
+        return None
+    found = []
+    for p in root.rglob("ckpt_*.pt"):
+        try:
+            found.append((int(p.stem.split("_")[1]), p))
+        except (IndexError, ValueError):
+            continue
+    return str(max(found, key=lambda pair: pair[0])[1]) if found else None
+
+
 def load_tokens(path, stoi):
     """Whole corpus as one uint16 array. ';' already delimits games, and '\\n'
     is not in the 32-char vocabulary, so it is stripped rather than encoded."""
@@ -114,7 +134,12 @@ def main() -> int:
     ap.add_argument("--eval-every", type=int, default=500)
     ap.add_argument("--ckpt-every", type=int, default=2000)
     ap.add_argument("--resume", default=None,
-                    help="path to a checkpoint from an earlier run")
+                    help="checkpoint to resume from; a directory resumes from "
+                         "the highest ckpt_N.pt inside it")
+    ap.add_argument("--auto-resume", action="store_true",
+                    help="resume from the newest checkpoint in --out if one "
+                         "exists, otherwise start from --init. Safe to leave "
+                         "on: a re-run continues instead of restarting.")
     args = ap.parse_args()
 
     from nanogpt_model import GPT, GPTConfig
@@ -137,7 +162,25 @@ def main() -> int:
     print(f"  train {len(train_tokens):,} tokens"
           + (f" · held out {len(val_tokens):,}" if val_tokens is not None else ""))
 
-    src = args.resume or args.init
+    # A Kaggle session can die at any point, so resuming has to be the easy
+    # path rather than something you remember to do. --auto-resume picks up the
+    # newest checkpoint without being told which one.
+    resume_from = args.resume
+    if resume_from and pathlib.Path(resume_from).is_dir():
+        resume_from = newest_checkpoint(resume_from)
+    if not resume_from and args.auto_resume:
+        resume_from = newest_checkpoint(out_dir)
+        # Every Kaggle session gets a fresh, empty /kaggle/working, so a
+        # checkpoint from last session can only be an attached input dataset.
+        # Without this the flag looks like it works and quietly restarts at 0.
+        if not resume_from and ON_KAGGLE:
+            resume_from = newest_checkpoint("/kaggle/input")
+        if resume_from:
+            print(f"auto-resume: found {pathlib.Path(resume_from).name}")
+        else:
+            print("auto-resume: no checkpoint yet, starting from scratch")
+
+    src = resume_from or args.init
     print(f"initialising from {pathlib.Path(src).name}")
     ckpt = torch.load(src, map_location="cpu", weights_only=False)
     model = GPT(GPTConfig(**ckpt["model_args"]))
@@ -148,7 +191,7 @@ def main() -> int:
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr,
                             betas=(0.9, 0.95), weight_decay=0.1)
     start_it = 0
-    if args.resume:
+    if resume_from:
         if "optimizer" in ckpt:
             opt.load_state_dict(ckpt["optimizer"])
         start_it = ckpt.get("iter_num", 0)
