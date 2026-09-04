@@ -1,0 +1,17 @@
+{
+  "checkpoint": "ckpt_15999.pt",
+  "params_m": 25.71,
+  "iter_num": 15999,
+  "games": 20,
+  "temperature": 0.5,
+  "legal_move_rate": 0.9109,
+  "legal_first_try_rate": 0.96,
+  "avg_plies": 56.2,
+  "totals": {
+    "plies": 1124,
+    "proposed": 1234,
+    "legal": 1124,
+    "first_try_legal": 1079
+  },
+  "sample_pgn": ";1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6 4.Ng5 d5 5.exd5 Nxd5 6.Nxf7 Kxf7 7.Qf3+ Ke6 8.Nc3 Bc5 9.Nxd5 Nd4 10.Qf7+ Kd6 11.c3 Rf8 12.Qxg7 Qh4 13.Qxf8+ Kc6 14.Ne7+ Kb6 15.Nd5+ Ka5 16.Nxc7 Rb8 17.Qxc5+ b5 18.Bxb5 Qe4+ 19.Kd1 Qxg2 20.Qxe5 Nxb5 21.Nxb5 Qxh1+ 22.Kc2 Bf5+ 23.d3 Qxc1+ 24.Rxc1 Bxd3+ 25.Kxd3 Rd8+ 26.Kc2 R"
+}

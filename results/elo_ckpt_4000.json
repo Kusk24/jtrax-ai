@@ -1,0 +1,39 @@
+{
+  "player": "ckpt_4000",
+  "games_per_rung": 12,
+  "estimated_elo": 282,
+  "rungs": [
+    {
+      "opponent": "UCI_Elo 1320",
+      "opponent_elo": 1320,
+      "exact": true,
+      "score": 0.0,
+      "games": 12,
+      "performance": 522
+    },
+    {
+      "opponent": "Skill 6 (~1200)",
+      "opponent_elo": 1200,
+      "exact": false,
+      "score": 0.0,
+      "games": 12,
+      "performance": 402
+    },
+    {
+      "opponent": "Skill 3 (~1000)",
+      "opponent_elo": 1000,
+      "exact": false,
+      "score": 0.0,
+      "games": 12,
+      "performance": 202
+    },
+    {
+      "opponent": "Skill 0 (~800)",
+      "opponent_elo": 800,
+      "exact": false,
+      "score": 0.0,
+      "games": 12,
+      "performance": 2
+    }
+  ]
+}
