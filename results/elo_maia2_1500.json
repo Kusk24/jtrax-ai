@@ -1,0 +1,39 @@
+{
+  "player": "maia2@1500",
+  "games_per_rung": 12,
+  "estimated_elo": 1291,
+  "rungs": [
+    {
+      "opponent": "UCI_Elo 1320",
+      "opponent_elo": 1320,
+      "exact": true,
+      "score": 3.0,
+      "games": 12,
+      "performance": 1129
+    },
+    {
+      "opponent": "UCI_Elo 1600",
+      "opponent_elo": 1600,
+      "exact": true,
+      "score": 1.5,
+      "games": 12,
+      "performance": 1262
+    },
+    {
+      "opponent": "UCI_Elo 1900",
+      "opponent_elo": 1900,
+      "exact": true,
+      "score": 1.0,
+      "games": 12,
+      "performance": 1483
+    },
+    {
+      "opponent": "UCI_Elo 2200",
+      "opponent_elo": 2200,
+      "exact": true,
+      "score": 0.0,
+      "games": 12,
+      "performance": 1402
+    }
+  ]
+}
