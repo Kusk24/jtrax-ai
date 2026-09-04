@@ -251,13 +251,18 @@ def main() -> int:
                   f"{elapsed / 60:.1f}m elapsed · ~{eta:.0f}m left", flush=True)
             history.append({"iter": it, "lr": lr, **losses})
 
-        if it > start_it and (it % args.ckpt_every == 0 or it == args.iters - 1):
-            path = out_dir / f"ckpt_{it}.pt"
+        # Name checkpoints by iterations COMPLETED, not the 0-based loop index,
+        # so --iters 40000 ends at ckpt_40000.pt rather than ckpt_39999.pt. It
+        # also makes resume exact: iter_num is the count already done.
+        completed = it + 1
+        if completed > start_it and (completed % args.ckpt_every == 0
+                                     or completed == args.iters):
+            path = out_dir / f"ckpt_{completed}.pt"
             torch.save({
                 "model": model.state_dict(),
                 "optimizer": opt.state_dict(),
                 "model_args": ckpt["model_args"],
-                "iter_num": it,
+                "iter_num": completed,
                 "config": {"lr": args.lr, "batch_size": args.batch_size,
                            "grad_accum": args.grad_accum, "data": args.data},
             }, path)
