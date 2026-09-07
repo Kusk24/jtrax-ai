@@ -91,3 +91,28 @@ cached.
 - Weights, checkpoints and `.onnx` files stay out of git — see `.gitignore`.
   Everything there is re-downloadable in one line.
 - `results/baseline.json` **is** tracked. It must not drift silently.
+
+## Naming
+
+Two models, same architecture and same script — only the training data differs.
+That is what makes them feel different to play against, rather than one simply
+being a worse version of the other.
+
+| | `strong` | `novice` |
+|---|---|---|
+| Rating band | 2000–2800 | 800–1200 |
+| Corpus | `data/strong_train.txt` · `strong_heldout.txt` | `data/novice_train.txt` · `novice_heldout.txt` |
+| Kaggle dataset | `jtrax-chess-strong` | `jtrax-chess-novice` |
+| Kaggle notebook | `jtrax-train-strong` | `jtrax-train-novice` |
+| Final model | `jtrax-strong-v1` | `jtrax-novice-v1` |
+| Expected Elo | ~1400–1600 | ~700–1000 |
+
+Build a corpus with `--prefix`, which keeps the bands side by side:
+
+```bash
+python step4_data.py --games 1000000 --heldout 10000 \
+    --elo-min 800 --elo-max 1200 --prefix novice_
+```
+
+In the Play screen these sit alongside Stockfish as three difficulty options —
+Stockfish superhuman, `jtrax-strong` club level, `jtrax-novice` beginner.
