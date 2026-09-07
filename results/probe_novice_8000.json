@@ -1,0 +1,17 @@
+{
+  "checkpoint": "ckpt_8000.pt",
+  "params_m": 25.71,
+  "iter_num": 8000,
+  "games": 20,
+  "temperature": 0.5,
+  "legal_move_rate": 0.8837,
+  "legal_first_try_rate": 0.9546,
+  "avg_plies": 54.0,
+  "totals": {
+    "plies": 1079,
+    "proposed": 1221,
+    "legal": 1079,
+    "first_try_legal": 1030
+  },
+  "sample_pgn": ";1.e4 e5 2.Nf3 Nc6 3.Bb5 Nf6 4.d3 Bc5 5.O-O O-O 6.h3 d6 7.c3 Nh5 8.d4 exd4 9.cxd4 Bb4 10.a3 Ba5 11.b4 Bb6 12.d5 Ne5 13.Nxe5 dxe5 14.Bc4 Nf4 15.Bxf4 exf4 16.Nc3 Qg5 17.Ne2 Bxh3 18.Qd4 Bxg2 19.Nxf4 Bxf1+ 20.Kxf1 Rae8 21.Nh3 Qg4 22.Nf4 Bxd4 23.Ne2 Bxa1 24.Ng3 Bd4 25.Nf5 Bxf2 26.Ne3 Qxe4 27.Nf5 Qxf5 28."
+}

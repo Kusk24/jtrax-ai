@@ -1,0 +1,55 @@
+{
+  "player": "lc0@1nodes",
+  "games_per_rung": 12,
+  "estimated_elo": 2017,
+  "rungs": [
+    {
+      "opponent": "Skill 0 (~800)",
+      "opponent_elo": 800,
+      "exact": false,
+      "score": 12.0,
+      "games": 12,
+      "performance": 1598
+    },
+    {
+      "opponent": "Skill 3 (~1000)",
+      "opponent_elo": 1000,
+      "exact": false,
+      "score": 11.5,
+      "games": 12,
+      "performance": 1545
+    },
+    {
+      "opponent": "Skill 6 (~1200)",
+      "opponent_elo": 1200,
+      "exact": false,
+      "score": 8.5,
+      "games": 12,
+      "performance": 1354
+    },
+    {
+      "opponent": "UCI_Elo 1320",
+      "opponent_elo": 1320,
+      "exact": true,
+      "score": 12.0,
+      "games": 12,
+      "performance": 2118
+    },
+    {
+      "opponent": "UCI_Elo 1600",
+      "opponent_elo": 1600,
+      "exact": true,
+      "score": 11.0,
+      "games": 12,
+      "performance": 2017
+    },
+    {
+      "opponent": "UCI_Elo 1900",
+      "opponent_elo": 1900,
+      "exact": true,
+      "score": 11.5,
+      "games": 12,
+      "performance": 2445
+    }
+  ]
+}

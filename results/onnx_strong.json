@@ -1,0 +1,21 @@
+{
+  "checkpoint": "maia2_ft_20000.pt",
+  "finetune_step": 20000,
+  "positions": 8192,
+  "max_drift_fp32": 1.52587890625e-05,
+  "scores": {
+    "fp32": {
+      "mb": 93.2,
+      "move_match": 0.5387
+    },
+    "float16": {
+      "mb": 46.7,
+      "move_match": 0.5397
+    },
+    "uint8": {
+      "mb": 23.5,
+      "move_match": 0.5299
+    }
+  },
+  "ship": "float16"
+}

@@ -1,0 +1,22 @@
+{
+  "checkpoint": "ckpt_40000.pt",
+  "iter_num": 40000,
+  "positions": 200,
+  "fp32": {
+    "mb": 103.1,
+    "agreement": 1.0,
+    "max_drift": 0.0001723766326904297
+  },
+  "int8": {
+    "mb": 26.0,
+    "agreement": 0.99,
+    "max_drift": 3.500545024871826,
+    "self_play": {
+      "legal_move_rate": 0.9449,
+      "legal_first_try_rate": 0.9825,
+      "avg_plies": 60.0
+    }
+  },
+  "pytorch_legal_move_rate": 0.9363,
+  "int8_shippable": true
+}

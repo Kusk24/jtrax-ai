@@ -1,0 +1,8 @@
+{
+  "heldout": "/Users/kusk/Desktop/JTrax/jtrax-ai/data/strong_heldout.txt",
+  "positions": 50176,
+  "band_elo": 2200,
+  "stock": 0.5089,
+  "finetuned": 0.5256,
+  "finetune_step": 20000
+}
