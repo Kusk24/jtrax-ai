@@ -180,6 +180,9 @@ def main() -> int:
     ap.add_argument("--heldout", type=int, default=HELDOUT)
     ap.add_argument("--elo-min", type=int, default=ELO_MIN)
     ap.add_argument("--elo-max", type=int, default=ELO_MAX)
+    ap.add_argument("--prefix", default="",
+                    help="filename prefix, e.g. 'novice_' — keeps corpora "
+                         "for different rating bands side by side")
     args = ap.parse_args()
 
     url = URL.format(args.month)
@@ -192,9 +195,9 @@ def main() -> int:
     print(f"Streaming {url}\n")
 
     DATA.mkdir(exist_ok=True)
-    train_path = DATA / "train.txt"
-    val_path = DATA / "heldout.txt"
-    partial = DATA / "collected.partial"
+    train_path = DATA / f"{args.prefix}train.txt"
+    val_path = DATA / f"{args.prefix}heldout.txt"
+    partial = DATA / f"{args.prefix}collected.partial"
 
     # Written as they arrive rather than buffered to the end: an hour-long
     # download that dies at minute 55 should not lose an hour of work. The
