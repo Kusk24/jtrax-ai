@@ -1,118 +1,35 @@
-# jtrax-ai
+# JTrax chess models
 
-Take a small, weak, public chess model and fine-tune it into a measurably
-better one. The point is the fine-tune itself — an improved model that is ours,
-rather than only ever calling someone else's.
+This repository trains, evaluates, and exports the two learned opponents used by the JTrax web and mobile apps. Training uses public Lichess games. School and student records stay outside the training corpus.
 
-**Base model:** `lichess_6layers` from [adamkarvonen/chess_llms][hf] — 1.3M
-parameters, 6 layers, 128-dim embedding, character-level over PGN text.
+| Opponent | Training | Browser export |
+| --- | --- | --- |
+| Novice | Character-level GPT trained from random initialization on lower-rated games | `results/novice_int8.onnx` |
+| Strong | Maia-2 fine-tuned on higher-rated human games | `results/strong_fp16.onnx` |
 
-```
-model_args: {n_layer: 6, n_head: 8, n_embd: 128, block_size: 1023, vocab_size: 32}
-params: 1.3M · iter_num: 600,000 · best_val_loss: 0.3415
-```
+On the same 50,176 held-out positions, stock Maia-2 matched the human move 50.89% of the time and the fine-tuned model matched it 52.56%. The [evaluation record](results/maia_heldout_movematch.json) identifies the checkpoint. [Novice](results/onnx_novice.json) and [strong](results/onnx_strong.json) export checks record how the compressed models performed.
 
-Chosen because it is genuinely weak (so there is room to improve), obscure
-(everyone else uses the 8- and 16-layer), reads chess as plain text (so data
-prep is a text file, not a tensor encoder), and is small enough to train on a
-MacBook.
+## Set up
 
-**Data:** ~10,000 Lichess games, one rating band, public — never students'
-games.
+Use a Python 3.12 environment. From the repository root:
 
-**Metrics:** move-match accuracy and legal-move rate, before vs. after.
-
-[hf]: https://huggingface.co/adamkarvonen/chess_llms
-
-## The benchmark: Maia-2
-
-Maia-2 is **not** the model being trained. It is the reference number, measured
-once so results have a scale to sit on:
-
-| | move-match |
-|---|---|
-| Maia-2 (23.3M params, 338M games) | **0.5311** |
-| `lichess_6layers`, before fine-tune | not yet measured |
-| `lichess_6layers`, after fine-tune | — |
-
-"I got 0.41" means nothing alone. "0.28 → 0.41, where state of the art is
-0.531" is a result. `step1_baseline.py` and `step2_export_onnx.py` produced
-that reference and the ONNX serving proof; neither needs running again.
-
-## Setup — run once
-
-System Python is 3.13; maia2 needs 3.10–3.12, so the env is required.
-
-```bash
-cd ~/Desktop/JTrax/jtrax-ai
-conda create -n jtrax-ai python=3.12 -y
+```sh
+conda create -n jtrax-ai python=3.12
 conda activate jtrax-ai
-pip install maia2 onnx onnxruntime huggingface_hub
+python -m pip install maia2 torch numpy python-chess requests zstandard onnx onnxruntime onnxconverter-common huggingface_hub
 ```
 
-`conda activate jtrax-ai` is needed in **every new terminal**.
+The Elo evaluation also needs a Stockfish executable. The [tracked results](results) can be inspected on a fresh clone. Training data, checkpoints, and exported model weights are separate artifacts.
 
-## Steps
+## Follow a model through the pipeline
 
-| Script | Status | What it does |
-|---|---|---|
-| `step1_baseline.py` | done — 0.5311 | Maia-2 reference number |
-| `step2_export_onnx.py` | done — 93.2 MB, 2.3e-05 drift | proves browser serving works |
-| `step3_probe.py` | done — `lichess_6layers` 0.848 legal | play self-play games, measure legality |
-| `step3b_sweep.py` | written, not run | probe early training checkpoints to pick a worse base |
-| `step4_data.py` | not written | pull games at one rating band, train/held-out split |
-| `step5_train.py` | not written | the fine-tune |
-| `step6_eval.py` | not written | all three metrics, before vs after |
+| Stage | Entry points |
+| --- | --- |
+| Build the corpus and held-out split | [Prepare public games](step4_data.py). Use separate rating bands and prefixes for each opponent. |
+| Train | [Novice GPT](step5_train.py), [strong Maia-2](step7_maia_finetune.py) |
+| Evaluate | [Play against Stockfish](step6_elo.py), [compare held-out moves](step8_maia_eval.py) |
+| Export | [Novice INT8](step9_export_novice_onnx.py), [strong FP16](step10_export_strong_onnx.py) |
 
-## The three eval metrics
+For example, inspect the data options with `python step4_data.py --help`. Keep the held-out split fixed when comparing training runs. The default exporters expect the novice checkpoint at `runs/ckpt_40000.pt`, the strong checkpoint at `runs_maia/maia2_ft_20000.pt`, and their corresponding held-out files under `data/`.
 
-A model can follow the rules and still play terribly, so one number is not
-enough. Measured before and after, on the same frozen set:
-
-| Metric | Question | Needs |
-|---|---|---|
-| **legal-move rate** | does it follow the rules? | self-play only |
-| **move-match accuracy** | does it play what a human at this level played? | held-out human games |
-| **average centipawn loss** | how good are the moves? | Stockfish (`brew install stockfish`) |
-
-ACPL is the standard chess measure of play quality: for each move, how much
-worse was it than the engine's best, in hundredths of a pawn. Lower is better —
-a strong club player is roughly 20–40, a beginner well over 100.
-
-Steps 1–2 are complete and should not need re-running; the downloads are
-cached.
-
-## Rules that do not bend
-
-- **Public Lichess data only.** Students are children; their linked games never
-  enter this repo, a Kaggle notebook, or a public dataset.
-- **Freeze the held-out set before training.** Without it, "did it improve?"
-  has no answer.
-- Weights, checkpoints and `.onnx` files stay out of git — see `.gitignore`.
-  Everything there is re-downloadable in one line.
-- `results/baseline.json` **is** tracked. It must not drift silently.
-
-## Naming
-
-Two models, same architecture and same script — only the training data differs.
-That is what makes them feel different to play against, rather than one simply
-being a worse version of the other.
-
-| | `strong` | `novice` |
-|---|---|---|
-| Rating band | 2000–2800 | 800–1200 |
-| Corpus | `data/strong_train.txt` · `strong_heldout.txt` | `data/novice_train.txt` · `novice_heldout.txt` |
-| Kaggle dataset | `jtrax-chess-strong` | `jtrax-chess-novice` |
-| Kaggle notebook | `jtrax-train-strong` | `jtrax-train-novice` |
-| Final model | `jtrax-strong-v1` | `jtrax-novice-v1` |
-| Expected Elo | ~1400–1600 | ~700–1000 |
-
-Build a corpus with `--prefix`, which keeps the bands side by side:
-
-```bash
-python step4_data.py --games 1000000 --heldout 10000 \
-    --elo-min 800 --elo-max 1200 --prefix novice_
-```
-
-In the Play screen these sit alongside Stockfish as three difficulty options —
-Stockfish superhuman, `jtrax-strong` club level, `jtrax-novice` beginner.
+After export, follow the [web app's model setup](https://github.com/Kusk24/jtrax-web-app/blob/main/public/models/README.md) to stage the files. The vault records the [training and deployment decisions](https://github.com/Kusk24/jtrax-docs/blob/main/features/training-our-own-chess-opponents.md).
